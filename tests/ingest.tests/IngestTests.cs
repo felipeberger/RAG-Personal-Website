@@ -73,6 +73,9 @@ public class OptionsTests
     [Fact]
     public void Parse_EnvVarsUsedWhenFlagsMissing()
     {
+        var originalEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
+        var originalDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT");
+
         Environment.SetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", "https://env.openai.azure.com/");
         Environment.SetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "env-deployment");
 
@@ -84,14 +87,17 @@ public class OptionsTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", null);
-            Environment.SetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", null);
+            Environment.SetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", originalEndpoint);
+            Environment.SetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", originalDeployment);
         }
     }
 
     [Fact]
     public void Parse_FlagsOverrideEnvVars()
     {
+        var originalEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT");
+        var originalDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT");
+
         Environment.SetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", "https://env.openai.azure.com/");
         Environment.SetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "env-deployment");
 
@@ -103,8 +109,8 @@ public class OptionsTests
         }
         finally
         {
-            Environment.SetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", null);
-            Environment.SetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", null);
+            Environment.SetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", originalEndpoint);
+            Environment.SetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", originalDeployment);
         }
     }
 }
