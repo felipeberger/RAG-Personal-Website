@@ -173,7 +173,7 @@ internal static class Program
 
     // ---------- Loading and validation ----------
 
-    private static List<Chunk> LoadChunks(Options opts, List<string> errors)
+    internal static List<Chunk> LoadChunks(Options opts, List<string> errors)
     {
         var chunks = new List<Chunk>();
         var outFull = Path.GetFullPath(opts.OutPath);
@@ -215,7 +215,7 @@ internal static class Program
         return chunks;
     }
 
-    private static void Validate(List<Chunk> chunks, List<string> errors, List<string> warnings)
+    internal static void Validate(List<Chunk> chunks, List<string> errors, List<string> warnings)
     {
         var seen = new Dictionary<string, string>();
 
@@ -246,7 +246,7 @@ internal static class Program
                     warnings.Add($"{c.Id}: related id '{r}' does not exist");
     }
 
-    private static Dictionary<string, IndexedChunk> LoadExisting(string path)
+    internal static Dictionary<string, IndexedChunk> LoadExisting(string path)
     {
         if (!File.Exists(path)) return new Dictionary<string, IndexedChunk>();
 
@@ -265,13 +265,13 @@ internal static class Program
     // ---------- Helpers ----------
 
     // Title is included because it gives the embedding useful context ("Story: ...", "Project: ...").
-    private static string EmbedInput(Chunk c) => $"{c.Title}\n{c.Text}";
+    internal static string EmbedInput(Chunk c) => $"{c.Title}\n{c.Text}";
 
     // Hash includes the endpoint and deployment so switching resources or models forces a full re-embed.
-    private static string ComputeHash(string endpoint, string deployment, string input) =>
+    internal static string ComputeHash(string endpoint, string deployment, string input) =>
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{endpoint}\n{deployment}\n{input}")));
 
-    private static IndexedChunk Build(Chunk c, string hash, float[] vector) =>
+    internal static IndexedChunk Build(Chunk c, string hash, float[] vector) =>
         new(c.Id, c.Type, c.Title, c.Text, c.Org, c.Period, c.Source, c.Tags, c.Related, c.File, hash, vector);
 }
 
