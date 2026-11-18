@@ -8,3 +8,7 @@ data/index.json
 data/index.json.tmp
 
 .env
+
+# Package installation files
+*.deb
+*.rpm
