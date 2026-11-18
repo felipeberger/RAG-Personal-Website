@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using Xunit;
 using IngestTests.Factories;
+using IngestTests.Helpers;
 
 namespace IngestTests;
 
@@ -321,8 +322,7 @@ public class LoadChunksTests
     [Fact]
     public void LoadChunks_ReadsValidJsonFile()
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(tempDir);
+        var tempDir = TestTempDir.Create();
         var file = Path.Combine(tempDir, "test.json");
 
         var json = """
@@ -364,15 +364,14 @@ public class LoadChunksTests
         }
         finally
         {
-            Directory.Delete(tempDir, true);
+            TestTempDir.Cleanup(tempDir);
         }
     }
 
     [Fact]
     public void LoadChunks_UsesFilenameAsSourceWhenMissing()
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(tempDir);
+        var tempDir = TestTempDir.Create();
         var file = Path.Combine(tempDir, "my-chunks.json");
 
         var json = """
@@ -393,15 +392,14 @@ public class LoadChunksTests
         }
         finally
         {
-            Directory.Delete(tempDir, true);
+            TestTempDir.Cleanup(tempDir);
         }
     }
 
     [Fact]
     public void LoadChunks_InvalidJson_AddsError()
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(tempDir);
+        var tempDir = TestTempDir.Create();
         var file = Path.Combine(tempDir, "bad.json");
 
         File.WriteAllText(file, "{ invalid json }");
@@ -417,15 +415,14 @@ public class LoadChunksTests
         }
         finally
         {
-            Directory.Delete(tempDir, true);
+            TestTempDir.Cleanup(tempDir);
         }
     }
 
     [Fact]
     public void LoadChunks_EmptyArray_ReturnsEmptyList()
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(tempDir);
+        var tempDir = TestTempDir.Create();
         var file = Path.Combine(tempDir, "empty.json");
 
         File.WriteAllText(file, "[]");
@@ -441,15 +438,14 @@ public class LoadChunksTests
         }
         finally
         {
-            Directory.Delete(tempDir, true);
+            TestTempDir.Cleanup(tempDir);
         }
     }
 
     [Fact]
     public void LoadChunks_MultipleFiles_CombinesChunks()
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(tempDir);
+        var tempDir = TestTempDir.Create();
 
         File.WriteAllText(Path.Combine(tempDir, "a.json"), """[{"id": "a1", "type": "story", "title": "A", "text": "Text A"}]""");
         File.WriteAllText(Path.Combine(tempDir, "b.json"), """[{"id": "b1", "type": "project", "title": "B", "text": "Text B"}]""");
@@ -466,15 +462,14 @@ public class LoadChunksTests
         }
         finally
         {
-            Directory.Delete(tempDir, true);
+            TestTempDir.Cleanup(tempDir);
         }
     }
 
     [Fact]
     public void LoadChunks_ExcludesIndexJsonFile()
     {
-        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(tempDir);
+        var tempDir = TestTempDir.Create();
 
         File.WriteAllText(Path.Combine(tempDir, "data.json"), """[{"id": "d1", "type": "story", "title": "D", "text": "Text"}]""");
         File.WriteAllText(Path.Combine(tempDir, "index.json"), """{"embeddingDeployment": "test", "dimensions": 1536, "createdUtc": "2024-01-01T00:00:00Z", "chunks": []}""");
@@ -490,7 +485,7 @@ public class LoadChunksTests
         }
         finally
         {
-            Directory.Delete(tempDir, true);
+            TestTempDir.Cleanup(tempDir);
         }
     }
 }
