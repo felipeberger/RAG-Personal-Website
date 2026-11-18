@@ -657,10 +657,20 @@ public class LoadExistingTests
         {
             File.WriteAllText(tempFile, "{ invalid json }");
 
+            // Capture Console.WriteLine output
+            var originalOut = Console.Out;
+            using var stringWriter = new StringWriter();
+            Console.SetOut(stringWriter);
+
             var dict = Program.LoadExisting(tempFile);
+
+            Console.SetOut(originalOut);
+            var output = stringWriter.ToString();
 
             Assert.NotNull(dict);
             Assert.Empty(dict);
+            Assert.Contains("warning: could not read the existing index", output);
+            Assert.Contains("re-embedding everything", output);
         }
         finally
         {
