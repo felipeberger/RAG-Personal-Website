@@ -173,6 +173,10 @@ internal static class Program
 
     // ---------- Loading and validation ----------
 
+    /// <summary>
+    /// Loads and deserializes all chunk JSON files from the data directory.
+    /// Internal for white-box testing — pure logic with no side effects.
+    /// </summary>
     internal static List<Chunk> LoadChunks(Options opts, List<string> errors)
     {
         var chunks = new List<Chunk>();
@@ -220,7 +224,11 @@ internal static class Program
         return chunks;
     }
 
-    internal static void Validate(List<Chunk> chunks, List<string> errors, List<string> warnings)
+    /// <summary>
+/// Validates chunks for duplicate IDs, empty titles/text, and related ID existence.
+/// Internal for white-box testing — pure logic with no side effects.
+/// </summary>
+internal static void Validate(List<Chunk> chunks, List<string> errors, List<string> warnings)
     {
         var seen = new Dictionary<string, string>();
 
@@ -251,7 +259,11 @@ internal static class Program
                     warnings.Add($"{c.Id}: related id '{r}' does not exist");
     }
 
-    internal static Dictionary<string, IndexedChunk> LoadExisting(string path)
+    /// <summary>
+/// Loads existing index.json for incremental re-embed comparison.
+/// Internal for white-box testing — pure logic with no side effects.
+/// </summary>
+internal static Dictionary<string, IndexedChunk> LoadExisting(string path)
     {
         if (!File.Exists(path)) return new Dictionary<string, IndexedChunk>();
 
@@ -269,13 +281,21 @@ internal static class Program
 
     // ---------- Helpers ----------
 
-    // Title is included because it gives the embedding useful context ("Story: ...", "Project: ...").
+    /// <summary>
+    /// Formats title + text for embedding. Internal for white-box testing.
+    /// </summary>
     internal static string EmbedInput(Chunk c) => $"{c.Title}\n{c.Text}";
 
-    // Hash includes the endpoint and deployment so switching resources or models forces a full re-embed.
+    /// <summary>
+    /// Computes SHA256 hash of endpoint + deployment + input for cache invalidation.
+    /// Internal for white-box testing — pure function.
+    /// </summary>
     internal static string ComputeHash(string endpoint, string deployment, string input) =>
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{endpoint}\n{deployment}\n{input}")));
 
+    /// <summary>
+    /// Builds an IndexedChunk from a Chunk, hash, and vector. Internal for white-box testing.
+    /// </summary>
     internal static IndexedChunk Build(Chunk c, string hash, float[] vector) =>
         new(c.Id, c.Type, c.Title, c.Text, c.Org, c.Period, c.Source, c.Tags, c.Related, c.File, hash, vector);
 }
