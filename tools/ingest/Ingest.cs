@@ -184,33 +184,38 @@ internal static class Program
             .OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
 
         foreach (var file in files)
-        {
-            var name = Path.GetFileName(file);
-            try
-            {
-                var items = JsonSerializer.Deserialize<List<RawChunk>>(File.ReadAllText(file), JsonIn)
-                            ?? new List<RawChunk>();
-
-                foreach (var r in items)
-                {
-                    chunks.Add(new Chunk(
-                        Id: r.Id ?? "",
-                        Type: r.Type ?? "",
-                        Title: r.Title ?? "",
-                        Text: r.Text ?? "",
-                        Org: r.Org,
-                        Period: r.Period,
-                        Source: r.Source ?? Path.GetFileNameWithoutExtension(file),
-                        Tags: r.Tags ?? Array.Empty<string>(),
-                        Related: r.Related ?? Array.Empty<string>(),
-                        File: name));
-                }
-            }
-            catch (JsonException ex)
-            {
-                errors.Add($"{name}: invalid JSON ({ex.Message})");
-            }
-        }
+                    {
+                        var name = Path.GetFileName(file);
+                        try
+                        {
+                            var items = JsonSerializer.Deserialize<List<RawChunk>>(File.ReadAllText(file), JsonIn)
+                                        ?? new List<RawChunk>();
+        
+                            foreach (var r in items)
+                            {
+                                if (r is null)
+                                {
+                                    errors.Add($"{name}: chunk entry is null");
+                                    continue;
+                                }
+                                chunks.Add(new Chunk(
+                                    Id: r.Id ?? "",
+                                    Type: r.Type ?? "",
+                                    Title: r.Title ?? "",
+                                    Text: r.Text ?? "",
+                                    Org: r.Org,
+                                    Period: r.Period,
+                                    Source: r.Source ?? Path.GetFileNameWithoutExtension(file),
+                                    Tags: r.Tags ?? Array.Empty<string>(),
+                                    Related: r.Related ?? Array.Empty<string>(),
+                                    File: name));
+                            }
+                        }
+                        catch (JsonException ex)
+                        {
+                            errors.Add($"{name}: invalid JSON ({ex.Message})");
+                        }
+                    }
 
         return chunks;
     }

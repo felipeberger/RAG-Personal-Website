@@ -420,6 +420,110 @@ public class LoadChunksTests
     }
 
     [Fact]
+    public void LoadChunks_ObjectInsteadOfArray_AddsError()
+    {
+        var tempDir = TestTempDir.Create();
+        var file = Path.Combine(tempDir, "bad.json");
+
+        // Valid JSON but object instead of array
+        File.WriteAllText(file, """{"id": "1", "title": "Test", "text": "Content"}""");
+
+        try
+        {
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var errors = new List<string>();
+            var chunks = Program.LoadChunks(opts, errors);
+
+            Assert.Empty(chunks);
+            Assert.Contains(errors, e => e.Contains("bad.json: invalid JSON"));
+        }
+        finally
+        {
+            TestTempDir.Cleanup(tempDir);
+        }
+    }
+
+    [Fact]
+    public void LoadChunks_NullElementInArray_AddsError()
+    {
+        var tempDir = TestTempDir.Create();
+        var file = Path.Combine(tempDir, "bad.json");
+
+        // Array with one valid element and one null element
+        File.WriteAllText(file, """[{"id": "1", "title": "T", "text": "T"}, null]""");
+
+        try
+        {
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var errors = new List<string>();
+            var chunks = Program.LoadChunks(opts, errors);
+
+            // Valid element is processed, null element adds error
+            Assert.Single(chunks);
+            Assert.Equal("1", chunks[0].Id);
+            Assert.Contains(errors, e => e.Contains("bad.json: chunk entry is null"));
+        }
+        finally
+        {
+            TestTempDir.Cleanup(tempDir);
+        }
+    }
+
+    [Fact]
+    public void LoadChunks_MissingRequiredFields_AddsError()
+    {
+        var tempDir = TestTempDir.Create();
+        var file = Path.Combine(tempDir, "bad.json");
+
+        // Array with object missing required fields (id, title, text)
+        // These become empty strings after deserialization, caught by Validate later
+        File.WriteAllText(file, """[{"type": "story"}]""");
+
+        try
+        {
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var errors = new List<string>();
+            var chunks = Program.LoadChunks(opts, errors);
+
+            // Chunk is created with empty Id/Title/Text - Validate will catch this
+            Assert.Single(chunks);
+            Assert.Equal("", chunks[0].Id);
+            Assert.Equal("", chunks[0].Title);
+            Assert.Equal("", chunks[0].Text);
+            // No errors from LoadChunks itself (deserialization succeeds)
+            Assert.Empty(errors);
+        }
+        finally
+        {
+            TestTempDir.Cleanup(tempDir);
+        }
+    }
+
+    [Fact]
+    public void LoadChunks_WrongFieldTypes_AddsError()
+    {
+        var tempDir = TestTempDir.Create();
+        var file = Path.Combine(tempDir, "bad.json");
+
+        // Valid JSON but id is a number instead of string
+        File.WriteAllText(file, """[{"id": 123, "title": "Test", "text": "Content"}]""");
+
+        try
+        {
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var errors = new List<string>();
+            var chunks = Program.LoadChunks(opts, errors);
+
+            Assert.Empty(chunks);
+            Assert.Contains(errors, e => e.Contains("bad.json: invalid JSON"));
+        }
+        finally
+        {
+            TestTempDir.Cleanup(tempDir);
+        }
+    }
+
+    [Fact]
     public void LoadChunks_EmptyArray_ReturnsEmptyList()
     {
         var tempDir = TestTempDir.Create();
