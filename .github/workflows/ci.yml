@@ -20,17 +20,16 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore tools/ingest/Ingest.csproj tests/ingest.tests/ingest.tests.csproj
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build tools/ingest/Ingest.csproj tests/ingest.tests/ingest.tests.csproj --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test --no-restore --configuration Release --verbosity normal
+        run: dotnet test tests/ingest.tests/ingest.tests.csproj --no-restore --configuration Release --verbosity normal
 
       - name: Validate data files (dry-run)
-        run: dotnet run --project tools/ingest -- --dry-run
-        working-directory: ${{ github.workspace }}
+        run: dotnet run --project tools/ingest/Ingest.csproj -- --dry-run
 
       - name: Upload index.json as artifact
         if: success()
@@ -54,5 +53,4 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Run ingest in dry-run mode
-        run: dotnet run --project tools/ingest -- --dry-run
-        working-directory: ${{ github.workspace }}
+        run: dotnet run --project tools/ingest/Ingest.csproj -- --dry-run
