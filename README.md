@@ -2,6 +2,8 @@
 
 Reads the chunk files in `data/`, embeds each chunk with Azure OpenAI, and writes `data/index.json`.
 
+**Requires .NET 9.0 SDK** (LTS). Install from [dotnet.microsoft.com](https://dotnet.microsoft.com/download/dotnet/9.0) or use your platform's package manager.
+
 ## Suggested layout
 
 ```
@@ -26,6 +28,8 @@ dotnet add package Azure.Identity
 dotnet add package Microsoft.Extensions.AI.OpenAI
 # If NuGet reports only prerelease versions for a package, add --prerelease
 ```
+
+> **Note:** The project targets .NET 9.0 (LTS). .NET 10 is still in preview and not yet supported.
 
 Sign in and set the config (PowerShell shown; use `export` on Linux/macOS):
 
