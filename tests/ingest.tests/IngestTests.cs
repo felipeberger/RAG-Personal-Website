@@ -470,13 +470,13 @@ public class LoadChunksTests
     }
 
     [Fact]
-    public void LoadChunks_MissingRequiredFields_AddsError()
+    public void LoadChunks_MissingRequiredFields_DeserializesWithEmptyValues()
     {
         var tempDir = TestTempDir.Create();
         var file = Path.Combine(tempDir, "bad.json");
 
         // Array with object missing required fields (id, title, text)
-        // These become empty strings after deserialization, caught by Validate later
+        // These become empty strings after deserialization
         File.WriteAllText(file, """[{"type": "story"}]""");
 
         try
@@ -492,6 +492,14 @@ public class LoadChunksTests
             Assert.Equal("", chunks[0].Text);
             // No errors from LoadChunks itself (deserialization succeeds)
             Assert.Empty(errors);
+
+            // Now validate - Validate skips title/text checks when id is empty (continue after empty id)
+            var validateErrors = new List<string>();
+            var warnings = new List<string>();
+            Program.Validate(chunks, validateErrors, warnings);
+
+            // Only empty id error is produced (Validate uses continue after empty id)
+            Assert.Contains(validateErrors, e => e.Contains("chunk with an empty id"));
         }
         finally
         {
@@ -653,18 +661,16 @@ public class LoadExistingTests
     public void LoadExisting_CorruptedJson_ReturnsEmptyDictionaryAndWarns()
     {
         var tempFile = Path.GetTempFileName();
+        var originalOut = Console.Out;
+        using var stringWriter = new StringWriter();
+        Console.SetOut(stringWriter);
+
         try
         {
             File.WriteAllText(tempFile, "{ invalid json }");
 
-            // Capture Console.WriteLine output
-            var originalOut = Console.Out;
-            using var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
-
             var dict = Program.LoadExisting(tempFile);
 
-            Console.SetOut(originalOut);
             var output = stringWriter.ToString();
 
             Assert.NotNull(dict);
@@ -674,6 +680,7 @@ public class LoadExistingTests
         }
         finally
         {
+            Console.SetOut(originalOut);
             File.Delete(tempFile);
         }
     }
