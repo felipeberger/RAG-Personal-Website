@@ -1,0 +1,35 @@
+[
+  {
+    "id": "project-personal-website",
+    "source": "personal-projects",
+    "type": "project",
+    "title": "Project: Felipe's personal website with an AI chat agent",
+    "org": null,
+    "period": "2026",
+    "tags": ["personal-project", "rag", "dotnet", "azure", "react", "typescript", "azure-openai", "bicep", "azd"],
+    "related": ["project-ingest-tool", "learning-dotnet-azure", "skills-cloud-tools"],
+    "text": "Felipe is building this personal website himself: CV pages plus a chat agent that answers visitors' questions about his CV, projects and skills. The agent uses retrieval-augmented generation (RAG) over a small knowledge base of text chunks written from his CVs and project stories. The backend is an ASP.NET Core minimal API on Azure and the frontend is React with TypeScript (Vite) on Azure Static Web Apps. It uses Azure OpenAI embedding and chat deployments with managed identity instead of API keys. Infrastructure is defined with Bicep and azd, and deployed through GitHub Actions with OIDC."
+  },
+  {
+    "id": "project-ingest-tool",
+    "source": "personal-projects",
+    "type": "project",
+    "title": "Project: C# ingestion tool for the chat agent's knowledge base",
+    "org": null,
+    "period": "2026",
+    "tags": ["personal-project", "csharp", "dotnet", "embeddings", "azure-openai", "xunit", "github-actions", "ci"],
+    "related": ["project-personal-website", "learning-dotnet-azure"],
+    "text": "Felipe wrote a C# ingestion tool for his personal website's chat agent. It reads the knowledge base's chunk files, validates them (duplicate or empty ids, empty text, invalid JSON), embeds each chunk's title and text with an Azure OpenAI embedding deployment, and writes a single index.json that the API loads at startup. Re-runs are incremental: only chunks whose content or embedding deployment changed are re-embedded, and the index is written atomically. It has dry-run and force modes, xUnit tests, and a GitHub Actions workflow that builds, tests and validates the data on every push."
+  },
+  {
+    "id": "learning-dotnet-azure",
+    "source": "personal-projects",
+    "type": "faq",
+    "title": "Felipe is learning .NET and Azure (coming from Ruby on Rails)",
+    "org": null,
+    "period": "2026",
+    "tags": ["learning", "dotnet", "csharp", "azure", "rails", "rust", "react", "typescript", "career-growth"],
+    "related": ["project-personal-website", "project-ingest-tool", "skills-backend", "cardcastle-rust-migration"],
+    "text": "Felipe is a mid-level backend developer whose professional experience is mainly Ruby on Rails, and he is currently learning .NET backend development. He is learning it by building his own personal website with ASP.NET Core, Azure and Azure OpenAI, including a C# ingestion tool with its own test suite. For the frontend he chose React and TypeScript over Blazor, because it is the more in-demand stack. He also has some experience with Rust from a production microservice migration at CardCastle."
+  }
+]
