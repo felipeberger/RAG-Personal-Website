@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/ingest.tests/ingest.tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/" />
+  <Folder Name="/tools/ingest/">
+    <Project Path="tools/ingest/Ingest.csproj" />
+  </Folder>
+</Solution>
