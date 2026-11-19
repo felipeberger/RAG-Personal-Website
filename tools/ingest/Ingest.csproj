@@ -14,4 +14,14 @@
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="11.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- InternalsVisibleTo allows the test assembly to access internal members for white-box testing.
+         The internal methods are pure logic (no side effects, no I/O) and represent core business rules
+         that benefit from direct unit testing. This is preferred over integration testing through Main
+         for a small CLI tool. -->
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>ingest.tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

@@ -173,7 +173,11 @@ internal static class Program
 
     // ---------- Loading and validation ----------
 
-    private static List<Chunk> LoadChunks(Options opts, List<string> errors)
+    /// <summary>
+    /// Loads and deserializes all chunk JSON files from the data directory.
+    /// Internal for white-box testing — pure logic with no side effects.
+    /// </summary>
+    internal static List<Chunk> LoadChunks(Options opts, List<string> errors)
     {
         var chunks = new List<Chunk>();
         var outFull = Path.GetFullPath(opts.OutPath);
@@ -184,38 +188,47 @@ internal static class Program
             .OrderBy(f => f, StringComparer.OrdinalIgnoreCase);
 
         foreach (var file in files)
-        {
-            var name = Path.GetFileName(file);
-            try
-            {
-                var items = JsonSerializer.Deserialize<List<RawChunk>>(File.ReadAllText(file), JsonIn)
-                            ?? new List<RawChunk>();
-
-                foreach (var r in items)
-                {
-                    chunks.Add(new Chunk(
-                        Id: r.Id ?? "",
-                        Type: r.Type ?? "",
-                        Title: r.Title ?? "",
-                        Text: r.Text ?? "",
-                        Org: r.Org,
-                        Period: r.Period,
-                        Source: r.Source ?? Path.GetFileNameWithoutExtension(file),
-                        Tags: r.Tags ?? Array.Empty<string>(),
-                        Related: r.Related ?? Array.Empty<string>(),
-                        File: name));
-                }
-            }
-            catch (JsonException ex)
-            {
-                errors.Add($"{name}: invalid JSON ({ex.Message})");
-            }
-        }
+                    {
+                        var name = Path.GetFileName(file);
+                        try
+                        {
+                            var items = JsonSerializer.Deserialize<List<RawChunk>>(File.ReadAllText(file), JsonIn)
+                                        ?? new List<RawChunk>();
+        
+                            foreach (var r in items)
+                            {
+                                if (r is null)
+                                {
+                                    errors.Add($"{name}: chunk entry is null");
+                                    continue;
+                                }
+                                chunks.Add(new Chunk(
+                                    Id: r.Id ?? "",
+                                    Type: r.Type ?? "",
+                                    Title: r.Title ?? "",
+                                    Text: r.Text ?? "",
+                                    Org: r.Org,
+                                    Period: r.Period,
+                                    Source: r.Source ?? Path.GetFileNameWithoutExtension(file),
+                                    Tags: r.Tags ?? Array.Empty<string>(),
+                                    Related: r.Related ?? Array.Empty<string>(),
+                                    File: name));
+                            }
+                        }
+                        catch (JsonException ex)
+                        {
+                            errors.Add($"{name}: invalid JSON ({ex.Message})");
+                        }
+                    }
 
         return chunks;
     }
 
-    private static void Validate(List<Chunk> chunks, List<string> errors, List<string> warnings)
+    /// <summary>
+/// Validates chunks for duplicate IDs, empty titles/text, and related ID existence.
+/// Internal for white-box testing — pure logic with no side effects.
+/// </summary>
+internal static void Validate(List<Chunk> chunks, List<string> errors, List<string> warnings)
     {
         var seen = new Dictionary<string, string>();
 
@@ -246,7 +259,11 @@ internal static class Program
                     warnings.Add($"{c.Id}: related id '{r}' does not exist");
     }
 
-    private static Dictionary<string, IndexedChunk> LoadExisting(string path)
+    /// <summary>
+/// Loads existing index.json for incremental re-embed comparison.
+/// Internal for white-box testing — pure logic with no side effects.
+/// </summary>
+internal static Dictionary<string, IndexedChunk> LoadExisting(string path)
     {
         if (!File.Exists(path)) return new Dictionary<string, IndexedChunk>();
 
@@ -264,14 +281,22 @@ internal static class Program
 
     // ---------- Helpers ----------
 
-    // Title is included because it gives the embedding useful context ("Story: ...", "Project: ...").
-    private static string EmbedInput(Chunk c) => $"{c.Title}\n{c.Text}";
+    /// <summary>
+    /// Formats title + text for embedding. Internal for white-box testing.
+    /// </summary>
+    internal static string EmbedInput(Chunk c) => $"{c.Title}\n{c.Text}";
 
-    // Hash includes the endpoint and deployment so switching resources or models forces a full re-embed.
-    private static string ComputeHash(string endpoint, string deployment, string input) =>
+    /// <summary>
+    /// Computes SHA256 hash of endpoint + deployment + input for cache invalidation.
+    /// Internal for white-box testing — pure function.
+    /// </summary>
+    internal static string ComputeHash(string endpoint, string deployment, string input) =>
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{endpoint}\n{deployment}\n{input}")));
 
-    private static IndexedChunk Build(Chunk c, string hash, float[] vector) =>
+    /// <summary>
+    /// Builds an IndexedChunk from a Chunk, hash, and vector. Internal for white-box testing.
+    /// </summary>
+    internal static IndexedChunk Build(Chunk c, string hash, float[] vector) =>
         new(c.Id, c.Type, c.Title, c.Text, c.Org, c.Period, c.Source, c.Tags, c.Related, c.File, hash, vector);
 }
 
