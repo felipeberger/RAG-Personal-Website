@@ -19,7 +19,7 @@
     "period": "2026",
     "tags": ["personal-project", "csharp", "dotnet", "embeddings", "azure-openai", "xunit", "github-actions", "ci"],
     "related": ["project-personal-website", "learning-dotnet-azure"],
-    "text": "Felipe wrote a C# ingestion tool for his personal website's chat agent. It reads the knowledge base's chunk files, validates them (duplicate or empty ids, empty text, invalid JSON), embeds each chunk's title and text with an Azure OpenAI embedding deployment, and writes a single index.json that the API loads at startup. Re-runs are incremental: only chunks whose content or embedding deployment changed are re-embedded, and the index is written atomically. It has dry-run and force modes, 38 xUnit tests, and a GitHub Actions workflow that builds, tests and validates the data on every push."
+    "text": "Felipe wrote a C# ingestion tool for his personal website's chat agent. It reads the knowledge base's chunk files, validates them (duplicate or empty ids, empty text, invalid JSON), embeds each chunk's title and text with an Azure OpenAI embedding deployment, and writes a single index.json that the API loads at startup. Re-runs are incremental: only chunks whose content or embedding deployment changed are re-embedded, and the index is written atomically. It has dry-run and force modes, xUnit tests, and a GitHub Actions workflow that builds, tests and validates the data on every push."
   },
   {
     "id": "learning-dotnet-azure",
