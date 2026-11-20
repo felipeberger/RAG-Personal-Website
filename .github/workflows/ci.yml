@@ -37,14 +37,6 @@ jobs:
       - name: Validate data files (dry-run)
         run: dotnet run --project tools/ingest/Ingest.csproj -- --dry-run
 
-      - name: Upload index.json as artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: index-json
-          path: data/index.json
-          retention-days: 7
-
   # Optional: Test that the tool can run without Azure credentials
   validate-ingest:
     runs-on: ubuntu-24.04
