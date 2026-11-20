@@ -3,8 +3,7 @@ bin/
 obj/
 tools/ingest/bin/
 
-# Generated index (large, rebuilt by ingest tool)
-data/index.json
+# Generated index temp file (the index itself is committed)
 data/index.json.tmp
 
 .env

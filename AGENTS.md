@@ -21,9 +21,9 @@ Config comes from `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_EMBEDDING_DEPLOYMENT
 
 ## Structure
 
-- `Program.cs`: everything: option parsing, loading, validation, incremental embedding, atomic write, and the record types (`RawChunk`, `Chunk`, `IndexedChunk`, `IndexFile`, `Options`).
+- `Ingest.cs`: everything: option parsing, loading, validation, incremental embedding, atomic write, and the record types (`RawChunk`, `Chunk`, `IndexedChunk`, `IndexFile`, `Options`).
 - `Ingest.csproj`: SDK-style project. Packages: `Azure.AI.OpenAI`, `Azure.Identity`, `Microsoft.Extensions.AI.OpenAI`.
-- `tests/ingest.tests/`: xUnit test project with 38 tests covering options parsing, validation, loading, hashing, and index loading.
+- `tests/ingest.tests/`: xUnit test project, covering options parsing, validation, loading, hashing, and index loading.
 
 ## Data
 
@@ -32,8 +32,9 @@ Source chunks live in `data/`:
 - `story-chunks.json`
 - `consulting-projects-chunks.json`
 - `consulting-cv-chunks.json`
+- `personal-project-chunks.json`
 
-Output: `data/index.json` (generated, not committed)
+Output: `data/index.json` (committed; regenerate after editing chunks)
 
 ## CI
 
@@ -67,3 +68,4 @@ GitHub Actions workflow at `.github/workflows/ci.yml`:
 ## Before finishing
 
 Run `dotnet build` and a `--dry-run` against `data/`. If you changed the index format, also run the tool for real and confirm the API still loads the result.
+If `title`, `text`, `tags`, `related`, `org`, `period` or `type` of any chunk changed, re-run ingest and commit `data/index.json` in the same commit.

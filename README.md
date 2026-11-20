@@ -129,3 +129,5 @@ public sealed class KnowledgeStore
 ## Deploying
 
 Run the tool locally or in CI whenever the chunk files change, then deploy `index.json` with the API (for example, copy it into the API project and set it to copy to the output directory). The API itself then needs only the chat and embedding deployments, not this tool.
+
+> **Note:** `data/index.json` is committed to the repo. Regenerate and commit it in the same change when chunk files are edited.
