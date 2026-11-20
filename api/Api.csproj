@@ -29,4 +29,9 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- One shared .env loader for the ingest tool and the API. -->
+    <Compile Include="../tools/ingest/DotEnv.cs" Link="DotEnv.cs" />
+  </ItemGroup>
+
 </Project>

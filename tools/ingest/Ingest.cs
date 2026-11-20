@@ -30,6 +30,9 @@ internal static class Program
 
     public static async Task<int> Main(string[] args)
     {
+        if (DotEnv.LoadNearest() is { } envFile)
+        Console.WriteLine($"Loaded environment from {envFile}");
+
         var opts = Options.Parse(args);
         if (opts.Help)
         {
