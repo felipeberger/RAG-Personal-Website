@@ -17,7 +17,9 @@ internal static class DotEnv
             if (!File.Exists(path)) continue;
 
             foreach (var (key, value) in Parse(File.ReadLines(path)))
-                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                // Only set if not already defined in real environment.
+                // Explicitly empty ("") counts as defined — don't override with .env value.
+                if (Environment.GetEnvironmentVariable(key) is null)
                     Environment.SetEnvironmentVariable(key, value);
 
             return path;
@@ -28,10 +30,21 @@ internal static class DotEnv
 
     /// <summary>
     /// Parses KEY=VALUE lines. Supports blank lines, # comments, an optional "export " prefix,
-    /// single or double quoted values, and trailing " # comments" on unquoted values.
+    /// single or double quoted values, and trailing comments on unquoted values.
     /// </summary>
+    /// <remarks>
+    /// Comment parsing rules:
+    /// <list type="bullet">
+    /// <item><description>Full-line comments: lines starting with <c>#</c> (after optional whitespace) are skipped entirely.</description></item>
+    /// <item><description>Quoted values (single <c>'</c> or double <c>"</c> quotes): <c>#</c> is always literal; no comment stripping.</description></item>
+    /// <item><description>Unquoted values: only trailing comments starting with <c> #</c> (space + hash) are stripped. A <c>#</c> without a preceding space is treated as part of the value.</description></item>
+    /// <item><description>There is no escape mechanism for <c>#</c> in unquoted values. Use quoted values to include literal <c>#</c>.</description></item>
+    /// </list>
+    /// </remarks>
     internal static IEnumerable<(string Key, string Value)> Parse(IEnumerable<string> lines)
     {
+        var seenKeys = new HashSet<string>(StringComparer.Ordinal);
+
         foreach (var raw in lines)
         {
             var line = raw.Trim();
@@ -39,10 +52,20 @@ internal static class DotEnv
             if (line.StartsWith("export ", StringComparison.Ordinal)) line = line[7..].TrimStart();
 
             var eq = line.IndexOf('=');
-            if (eq <= 0) continue;
+            if (eq < 0) continue; // no equals sign, skip silently (like original)
+            if (eq == 0)
+                throw new FormatException("Invalid key in .env: empty key. Keys must contain only letters, digits, or underscore.");
 
             var key = line[..eq].Trim();
             var value = line[(eq + 1)..].Trim();
+
+            // Validate key format: only alphanumeric and underscore allowed (no hyphens, no whitespace)
+            if (!IsValidKey(key))
+                throw new FormatException($"Invalid key in .env: '{key}'. Keys must contain only letters, digits, or underscore.");
+
+            // Check for duplicates
+            if (!seenKeys.Add(key))
+                throw new FormatException($"Duplicate key in .env: '{key}'. Each key can only be defined once.");
 
             var quoted = value.Length >= 2 &&
                          ((value[0] == '"' && value[^1] == '"') || (value[0] == '\'' && value[^1] == '\''));
@@ -58,5 +81,21 @@ internal static class DotEnv
 
             yield return (key, value);
         }
+    }
+
+    /// <summary>
+    /// Validates an environment variable key format.
+    /// Keys must contain only letters, digits, or underscore.
+    /// </summary>
+    private static bool IsValidKey(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key)) return false;
+
+        foreach (var c in key)
+        {
+            if (!char.IsLetterOrDigit(c) && c != '_')
+                return false;
+        }
+        return true;
     }
 }

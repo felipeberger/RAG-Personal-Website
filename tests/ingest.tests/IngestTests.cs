@@ -344,7 +344,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
@@ -383,7 +383,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
@@ -406,7 +406,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
@@ -430,7 +430,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
@@ -454,7 +454,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
@@ -481,7 +481,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
@@ -518,7 +518,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
@@ -541,7 +541,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
@@ -564,7 +564,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "ignored", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
@@ -588,7 +588,7 @@ public class LoadChunksTests
 
         try
         {
-            var opts = new Options(DataDir: tempDir, OutPath: "index.json", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false);
+            var opts = new Options(DataDir: tempDir, OutPath: "index.json", Endpoint: null, Deployment: null, DryRun: false, Force: false, Help: false, Verbose: false);
             var errors = new List<string>();
             var chunks = Program.LoadChunks(opts, errors);
 
