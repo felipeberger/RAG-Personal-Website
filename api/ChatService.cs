@@ -5,7 +5,8 @@ internal sealed record ChatTurn(string Role, string Content);
 internal sealed record ChatRequest(List<ChatTurn>? Messages)
 {
     public const int MaxMessages = 12;
-    public const int MaxContentLength = 600;
+    public const int MaxContentLength = 600;       // visitor questions
+    public const int MaxAssistantLength = 4000;    // earlier answers sent back as history
 
     /// <summary>Returns an error message, or null when the request is acceptable.</summary>
     public string? Validate()
@@ -19,7 +20,8 @@ internal sealed record ChatRequest(List<ChatTurn>? Messages)
             // Clients may only send user/assistant turns; the system prompt is ours alone.
             if (m.Role is not ("user" or "assistant")) return "Role must be 'user' or 'assistant'.";
             if (string.IsNullOrWhiteSpace(m.Content)) return "Message content must not be empty.";
-            if (m.Content.Length > MaxContentLength) return $"Messages are limited to {MaxContentLength} characters.";
+            var limit = m.Role == "user" ? MaxContentLength : MaxAssistantLength;
+            if (m.Content.Length > limit) return $"Messages are limited to {limit} characters.";
         }
 
         if (Messages[^1].Role != "user") return "The last message must be from the user.";
