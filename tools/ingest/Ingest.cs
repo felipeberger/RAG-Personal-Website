@@ -31,6 +31,11 @@ internal static class Program
     public static async Task<int> Main(string[] args)
     {
         var opts = Options.Parse(args);
+
+        if (DotEnv.LoadNearest() is { } envFile && opts.Verbose)
+        {
+            Console.WriteLine($"Loaded environment from {envFile}");
+        }
         if (opts.Help)
         {
             Console.WriteLine(Options.HelpText);
@@ -322,10 +327,49 @@ internal sealed record IndexFile(
 
 internal sealed record Options(
     string DataDir, string OutPath, string? Endpoint, string? Deployment,
-    bool DryRun, bool Force, bool Help)
+    bool DryRun, bool Force, bool Help, bool Verbose)
 {
     public static Options Parse(string[] args)
     {
+        // Validate args first: check for malformed flags and duplicates
+        var knownFlags = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "--data", "--out", "--endpoint", "--deployment", "--dry-run", "--force", "--help", "-h", "--verbose", "-v"
+        };
+
+        var seenFlags = new HashSet<string>(StringComparer.Ordinal);
+        var errors = new List<string>();
+
+        for (int i = 0; i < args.Length; i++)
+        {
+            var arg = args[i];
+            if (!arg.StartsWith("-", StringComparison.Ordinal)) continue;
+
+            // Check for malformed flag: whitespace or invalid characters
+            if (!IsValidFlag(arg))
+            {
+                errors.Add($"Malformed flag: '{arg}'. Flags must start with - or -- and contain only alphanumeric, hyphen, or underscore.");
+            }
+
+            // Check for duplicates
+            if (!seenFlags.Add(arg))
+            {
+                errors.Add($"Duplicate flag: '{arg}'. Each flag can only be specified once.");
+            }
+
+            // Check for unknown flags
+            if (!knownFlags.Contains(arg))
+            {
+                errors.Add($"Unknown flag: '{arg}'. Use --help for usage.");
+            }
+        }
+
+        if (errors.Count > 0)
+        {
+            foreach (var e in errors) Console.Error.WriteLine($"error: {e}");
+            Environment.Exit(1);
+        }
+
         string? Get(string name)
         {
             var i = Array.IndexOf(args, name);
@@ -342,7 +386,28 @@ internal sealed record Options(
             Deployment: Get("--deployment") ?? Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT"),
             DryRun: Has("--dry-run"),
             Force: Has("--force"),
-            Help: Has("--help") || Has("-h"));
+            Help: Has("--help") || Has("-h"),
+            Verbose: Has("--verbose") || Has("-v"));
+    }
+
+    /// <summary>
+    /// Validates a flag format: must start with - or --, followed by alphanumeric, hyphen, or underscore only.
+    /// </summary>
+    private static bool IsValidFlag(string flag)
+    {
+        if (string.IsNullOrWhiteSpace(flag)) return false;
+        if (!flag.StartsWith("-", StringComparison.Ordinal)) return false;
+
+        // After leading - or --, only alphanumeric, hyphen, underscore allowed
+        var body = flag.TrimStart('-');
+        if (string.IsNullOrEmpty(body)) return false; // just "-" or "--"
+
+        foreach (var c in body)
+        {
+            if (!char.IsLetterOrDigit(c) && c != '-' && c != '_')
+                return false;
+        }
+        return true;
     }
 
     public const string HelpText = """
@@ -354,6 +419,7 @@ internal sealed record Options(
           --deployment <name>   Embedding deployment name (or env AZURE_OPENAI_EMBEDDING_DEPLOYMENT)
           --dry-run             Validate the chunk files only; no Azure calls
           --force               Re-embed every chunk, ignoring the existing index
+          -v, --verbose         Verbose output
           -h, --help            Show this help
 
         Authentication uses DefaultAzureCredential (az login locally, managed identity in Azure).

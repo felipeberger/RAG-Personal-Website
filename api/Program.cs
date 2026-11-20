@@ -4,6 +4,10 @@ using Azure.AI.OpenAI;
 using Azure.Identity;
 using Microsoft.Extensions.AI;
 
+// Local dev: load the nearest .env (real environment variables win). Must run before the
+// builder so AzureOpenAI__* variables in .env reach the configuration system too.
+DotEnv.LoadNearest();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ---------- Configuration ----------
