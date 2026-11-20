@@ -1,0 +1,46 @@
+[
+  {
+    "id": "personal-salary",
+    "source": "personal-info",
+    "type": "faq",
+    "title": "Felipe's salary expectations",
+    "org": null,
+    "period": null,
+    "tags": ["salary", "compensation", "pay", "contact", "recruiters", "hiring"],
+    "related": ["personal-availability"],
+    "text": "Felipe's salary expectations are not listed on his website. Recruiters and employers who want to discuss salary or compensation can contact Felipe directly by email at felipecberger@gmail.com, and he is happy to talk it through with them."
+  },
+  {
+    "id": "personal-location",
+    "source": "personal-info",
+    "type": "faq",
+    "title": "Where Felipe is based",
+    "org": null,
+    "period": null,
+    "tags": ["location", "canberra", "australia", "based", "where", "hiring"],
+    "related": ["contact-links", "personal-availability"],
+    "text": "Felipe is based in Canberra, Australia. Employers and recruiters asking where he lives or works from can treat Canberra, in the Australian Capital Territory, as his current location."
+  },
+  {
+    "id": "personal-availability",
+    "source": "personal-info",
+    "type": "faq",
+    "title": "Felipe's availability and job search status",
+    "org": null,
+    "period": null,
+    "tags": ["availability", "job-search", "open-to-work", "start-date", "contact", "hiring", "recruiters"],
+    "related": ["personal-role-preferences", "personal-salary"],
+    "text": "Felipe is currently looking for new opportunities, so he might be available to start immediately. Employers and recruiters who want to confirm his availability or discuss a start date can email him at felipecberger@gmail.com."
+  },
+  {
+    "id": "personal-role-preferences",
+    "source": "personal-info",
+    "type": "faq",
+    "title": "The roles Felipe is looking for",
+    "org": null,
+    "period": null,
+    "tags": ["roles", "preferences", "product-engineer", "backend", "open-to-work", "stack", "hiring"],
+    "related": ["background-research-to-engineering", "skills-backend", "skills-frontend", "personal-availability"],
+    "text": "Felipe has experience in customer research and backend development, with some experience in frontend development as well. He is looking for Product Engineer or Backend development roles, and he is also open to different tech stacks or different kinds of roles."
+  }
+]
