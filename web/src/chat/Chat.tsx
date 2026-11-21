@@ -203,7 +203,7 @@ export default function Chat() {
       ) : (
         <header className="hero">
           <h1>Felipe Berger</h1>
-          <p>Backend engineer in Canberra. Ask about his work, projects and skills.</p>
+          <p>Product engineer in Canberra. Ask about his work, projects and skills.</p>
         </header>
       )}
 
