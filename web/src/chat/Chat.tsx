@@ -19,9 +19,25 @@ const SUGGESTIONS = [
 ];
 
 const CV_DEBOUNCE_MS = 600; // brief pause before showing CV so it feels natural
+const CV_TYPING_SPEED_MS = 12; // ms per character for typewriter effect
 
 interface UiMessage extends ChatTurn {
   cv?: boolean; // render the CV under this assistant message
+}
+
+/** Typewriter effect: streams text character by character, then calls onComplete */
+function typewriter(text: string, onDelta: (partial: string) => void, onComplete: () => void): void {
+  let i = 0;
+  function step() {
+    if (i <= text.length) {
+      onDelta(text.slice(0, i));
+      i++;
+      setTimeout(step, CV_TYPING_SPEED_MS);
+    } else {
+      onComplete();
+    }
+  }
+  step();
 }
 
 /** Short "show me the CV" requests are answered locally with the rendered CV, no API call. */
@@ -97,13 +113,23 @@ export default function Chat() {
 
     if (isCvRequest(question)) {
       showCvTopRef.current = true;
-      // Show "thinking" first, then reveal CV after a brief debounce
+      // Show "thinking" first
       setMessages((prev) => [...prev, asked, { role: 'assistant', content: '' }]);
       setTimeout(() => {
-        setMessages((prev) => [
-          ...prev.slice(0, -1),
-          { role: 'assistant', content: "Here's Felipe's CV.", cv: true },
-        ]);
+        // Typewriter: "Here's Felipe's CV." then show CV component
+        typewriter(
+          "Here's Felipe's CV.",
+          (partial) =>
+            setMessages((prev) => [
+              ...prev.slice(0, -1),
+              { role: 'assistant', content: partial },
+            ]),
+          () =>
+            setMessages((prev) => [
+              ...prev.slice(0, -1),
+              { role: 'assistant', content: "Here's Felipe's CV.", cv: true },
+            ]),
+        );
       }, CV_DEBOUNCE_MS);
       return;
     }
