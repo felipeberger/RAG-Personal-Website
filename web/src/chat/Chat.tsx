@@ -5,6 +5,7 @@ import { ChatError, streamChat, type ChatTurn } from './streamChat';
 const DEFAULT_PROMPT = "Show me Felipe's CV";
 const MAX_INPUT = 600; // matches the API's limit for visitor messages
 const MAX_MESSAGES = 12; // matches the API's limit per request
+const FOLLOW_THRESHOLD = 120; // px from the bottom that still counts as "at the bottom"
 
 const SUGGESTIONS = [
   'Which roles is he looking for?',
@@ -28,12 +29,31 @@ export default function Chat() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const cvRef = useRef<HTMLDivElement>(null); // the latest CV message
+  const followRef = useRef(true); // keep the newest text in view?
+  const showCvTopRef = useRef(false); // on the next render, scroll to the start of the CV
 
   const started = messages.length > 0;
 
+  // Follow the newest text, unless the visitor has scrolled up to read something.
   useEffect(() => {
-    if (started) endRef.current?.scrollIntoView({ block: 'end' });
+    const onScroll = () => {
+      const distance = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight);
+      followRef.current = distance < FOLLOW_THRESHOLD;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (showCvTopRef.current && cvRef.current) {
+      // A CV is long: start reading at its top instead of jumping to its end.
+      showCvTopRef.current = false;
+      followRef.current = false;
+      cvRef.current.scrollIntoView({ block: 'start' });
+    } else if (followRef.current && started) {
+      window.scrollTo({ top: document.documentElement.scrollHeight });
+    }
   }, [messages, error, started]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -47,10 +67,13 @@ export default function Chat() {
     const asked: UiMessage = { role: 'user', content: question };
 
     if (isCvRequest(question)) {
+      showCvTopRef.current = true;
       setMessages((prev) => [...prev, asked, { role: 'assistant', content: "Here's Felipe's CV.", cv: true }]);
       return;
     }
 
+    // The visitor just asked something: show the new answer as it streams in.
+    followRef.current = true;
     const outgoing = [...messages, asked];
     setMessages([...outgoing, { role: 'assistant', content: '' }]);
     setBusy(true);
@@ -90,6 +113,8 @@ export default function Chat() {
     setError(null);
     setBusy(false);
     setInput(DEFAULT_PROMPT);
+    followRef.current = true;
+    window.scrollTo({ top: 0 });
   }
 
   function onSubmit(e: FormEvent) {
@@ -123,7 +148,7 @@ export default function Chat() {
       {started && (
         <div className="log" role="log" aria-live="polite" aria-busy={busy}>
           {messages.map((m, i) => (
-            <div key={i} className={`msg ${m.role}`}>
+            <div key={i} ref={m.cv ? cvRef : undefined} className={`msg ${m.role}`}>
               {m.content || <span className="thinking">Thinking</span>}
               {m.cv && <CvView />}
             </div>
@@ -133,7 +158,6 @@ export default function Chat() {
               {error}
             </p>
           )}
-          <div ref={endRef} />
         </div>
       )}
 

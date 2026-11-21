@@ -15,7 +15,7 @@ export interface RoleGroup {
 
 export const cv = {
   name: 'Felipe Berger',
-  headline: 'Backend software engineer',
+  headline: 'Product Engineer | Ruby on Rails, Rust, React, TypeScript, PostgreSQL, Azure',
   location: 'Canberra, ACT, Australia',
   links: {
     github: 'https://github.com/felipeberger',
@@ -23,7 +23,7 @@ export const cv = {
     email: 'felipecberger@gmail.com',
   },
   summary:
-    'Backend software engineer with 4+ years of experience designing, building and maintaining backend services, APIs, third-party integrations and data-intensive systems. Strongest in Ruby on Rails, PostgreSQL and production debugging, with a focus on reliability, performance, testing and maintainable architecture. Has supported production systems used by 150k+ users and worked directly with users and stakeholders to solve complex problems.',
+    'Product-minded software engineer with 4+ years of experience designing, building and maintaining backend services, APIs, third-party integrations and data-intensive systems. Experienced in Ruby on Rails, PostgreSQL and production debugging, with a focus on reliability, performance, testing and maintainable architecture. Has taken features from customer research through to production, and supported systems used by 150k+ users while working directly with users and stakeholders to solve complex problems.',
 
   experience: [
     {
@@ -39,6 +39,8 @@ export const cv = {
             'Reduced API response times from over 1.5 seconds to under 0.5 seconds by refactoring legacy SQL, fixing N+1 queries and adding indexes.',
             'Helped migrate a daily background job to a Rust microservice, cutting its execution time by 66%.',
             'Refactored a 10-year-old mission-critical codebase and built a FactoryBot framework of mock pricing payloads, so the price-update workflow could be tested automatically for the first time.',
+            'Extended event driven (webhooks) integration with payment providers (Stripe and Paypal)',
+            'Implemented automated unit and integration tests and applied TDD to improve reliability and reduce regressions',
             'Helped design and build an inventory management system, combining customer research with engineering requirements.',
             'Acted as technical support for escalated production issues: investigate logs and Datadog, replicate the error, ship a tested fix.',
           ],
@@ -66,6 +68,25 @@ export const cv = {
     {
       heading: 'Earlier career',
       roles: [
+        {
+          title: 'Freelance Consultant',
+          org: 'Self-employed, Australia and Vanuatu',
+          period: 'February 2020 – June 2021',
+          bullets: [
+            'Analysed in-depth interview and focus group discussion data on supermarket shopping behaviour for a major online supermarket in Singapore, identifying key painpoints and barriers users experienced while using the website',
+            'Interviewed lawyers about their current use of technology, barriers to adoption, and needs from legal software, outlining how needs differ  depending on size and area of expertise of each legal firm'
+          ],
+        },
+        {
+          title: 'Senior Research Manager',
+          org: 'Blackbox Research, Singapore',
+          period: 'March 2018 – Feb 2020',
+          bullets: [
+            'Managed a team of 3 analysts and 1 research manager to deliver behavioural insights studies and qualitative research projects',
+            'Conducted usability testing, UI/UX analysis, and journey mapping for public-facing government websites, mobile apps, and physical service centres. Insights were used to improve the user experience and journey',
+            'Coordinated and facilitated design-thinking workshops with end-users, designers, and product managers to improve usability and relevance of electronic services provided to migrants and blue collar workers'
+          ],
+        },
         {
           title: 'Consultant, then Senior Consultant',
           org: 'Emerging Markets Consulting, Cambodia and Laos',
