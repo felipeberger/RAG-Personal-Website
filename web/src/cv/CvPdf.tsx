@@ -198,22 +198,23 @@ interface SectionProps {
   title: string;
   children: React.ReactNode;
   breakBefore?: boolean;
+  wrap?: boolean;
 }
-function Section({ title, children, breakBefore = false }: SectionProps) {
+function Section({ title, children, breakBefore = false, wrap = true }: SectionProps) {
   return (
-    <View style={styles.section} wrap={true} break={breakBefore}>
+    <View style={styles.section} wrap={wrap} break={breakBefore}>
       <Text style={styles.sectionTitle}>{title}</Text>
       {children}
     </View>
   );
 }
 
-/** Education section with forced page break before it */
+/** Education section with forced page break before it, kept together on one page */
 function EducationSection() {
   return (
-    <Section title="Education" breakBefore={true}>
+    <Section title="Education" breakBefore={true} wrap={false}>
       {cv.education.map((edu) => (
-        <View key={edu.title} style={styles.educationItem} wrap={false}>
+        <View key={edu.title} style={styles.educationItem}>
           <Text style={styles.eduTitleOrg}>
             {edu.title}, {edu.org}
           </Text>
