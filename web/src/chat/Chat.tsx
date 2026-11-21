@@ -28,12 +28,15 @@ function isCvRequest(q: string): boolean {
   return words <= 8 && /(^|\W)(cv|resume|résumé)(\W|$)/i.test(q);
 }
 
-/** Detect "download/save/export CV" requests. */
+/** Detect "download/save/export/send/give/email/share CV" requests. */
 function isDownloadCvRequest(q: string): boolean {
   const words = q.trim().split(/\s+/).length;
-  return words <= 8 &&
-    /(^|\W)(download|save|export|get)(\W|$)/i.test(q) &&
-    /(cv|resume|résumé)/i.test(q);
+  if (words > 8) return false;
+  // Download verbs + "give/send/email/share me" patterns
+  const hasDownloadVerb = /(^|\W)(download|save|export|get)(\W|$)/i.test(q);
+  const hasGivePattern = /(^|\W)(give|send|email|share)\s+(me|us)\b/i.test(q);
+  const hasCvKeyword = /(cv|resume|résumé)/i.test(q);
+  return hasCvKeyword && (hasDownloadVerb || hasGivePattern);
 }
 
 export default function Chat() {

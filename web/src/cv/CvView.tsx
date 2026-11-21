@@ -1,12 +1,19 @@
+import { useState } from 'react';
 import { cv } from './cv';
 import { downloadCvPdf } from './CvPdf';
 
 export default function CvView() {
+  const [downloading, setDownloading] = useState(false);
+
   const handleDownload = async () => {
+    if (downloading) return;
+    setDownloading(true);
     try {
       await downloadCvPdf();
     } catch {
       alert("Sorry, couldn't generate the PDF. Try again?");
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -22,8 +29,14 @@ export default function CvView() {
           <a href={cv.links.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>{' '}
           <a href={`mailto:${cv.links.email}`}>Email</a>
         </p>
-        <button className="cv-download" onClick={handleDownload} type="button">
-          Download PDF
+        <button
+          className="cv-download"
+          onClick={handleDownload}
+          type="button"
+          disabled={downloading}
+          aria-busy={downloading}
+        >
+          {downloading ? 'Generating…' : 'Download PDF'}
         </button>
       </header>
 
