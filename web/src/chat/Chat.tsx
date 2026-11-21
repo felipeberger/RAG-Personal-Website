@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import CvView from '../cv/CvView';
 import { ChatError, streamChat, type ChatTurn } from './streamChat';
 
@@ -120,7 +120,7 @@ export default function Chat() {
     window.scrollTo({ top: 0 });
   }
 
-  function onSubmit(e: FormEvent) {
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     void send(input);
   }
