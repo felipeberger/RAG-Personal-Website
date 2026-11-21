@@ -15,7 +15,7 @@ export interface RoleGroup {
 
 export const cv = {
   name: 'Felipe Berger',
-  headline: 'Product Engineer | Ruby on Rails, Rust, React, TypeScript, PostgreSQL, Azure',
+  headline: 'Product Engineer | Ruby on Rails, Rust, C#, React, TypeScript, PostgreSQL, Azure',
   location: 'Canberra, ACT, Australia',
   links: {
     github: 'https://github.com/felipeberger',
