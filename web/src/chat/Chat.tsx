@@ -19,25 +19,47 @@ const SUGGESTIONS = [
 ];
 
 const CV_DEBOUNCE_MS = 600; // brief pause before showing CV so it feels natural
-const CV_TYPING_SPEED_MS = 12; // ms per character for typewriter effect
+const CV_SECTION_DELAY_MS = 350; // ms between sections (6 sections * 350ms = ~2.1s total)
 
 interface UiMessage extends ChatTurn {
   cv?: boolean; // render the CV under this assistant message
 }
 
-/** Typewriter effect: streams text character by character, then calls onComplete */
-function typewriter(text: string, onDelta: (partial: string) => void, onComplete: () => void): void {
-  let i = 0;
-  function step() {
-    if (i <= text.length) {
-      onDelta(text.slice(0, i));
-      i++;
-      setTimeout(step, CV_TYPING_SPEED_MS);
-    } else {
+/** Stream CV in major sections for a ~2-3s total effect */
+function streamCvSections(onDelta: (partial: string) => void, onComplete: () => void): void {
+  const fullText = cvToText();
+  // Split into major CV sections (7 sections = ~2-3s at 300ms each)
+  const majorSections = [
+    // Header + Summary
+    fullText.substring(0, fullText.indexOf('\n\nEXPERIENCE') + 10),
+    // Experience
+    fullText.substring(fullText.indexOf('EXPERIENCE'), fullText.indexOf('\n\nEDUCATION')),
+    // Education
+    fullText.substring(fullText.indexOf('EDUCATION'), fullText.indexOf('\n\nCERTIFICATION')),
+    // Certification
+    fullText.substring(fullText.indexOf('CERTIFICATION'), fullText.indexOf('\n\nSKILLS')),
+    // Skills
+    fullText.substring(fullText.indexOf('SKILLS'), fullText.indexOf('\n\nLANGUAGES')),
+    // Languages
+    fullText.substring(fullText.indexOf('LANGUAGES')),
+  ].filter(Boolean);
+
+  let current = '';
+  let sectionIndex = 0;
+
+  function nextSection() {
+    if (sectionIndex >= majorSections.length) {
       onComplete();
+      return;
     }
+    const section = majorSections[sectionIndex];
+    // Add section with a newline if not the first
+    current += (sectionIndex > 0 ? '\n\n' : '') + section;
+    onDelta(current);
+    sectionIndex++;
+    setTimeout(nextSection, CV_SECTION_DELAY_MS);
   }
-  step();
+  nextSection();
 }
 
 /** Convert CV data to formatted text for streaming */
@@ -158,22 +180,14 @@ export default function Chat() {
       // Show "thinking" first
       setMessages((prev) => [...prev, asked, { role: 'assistant', content: '' }]);
       setTimeout(() => {
-        // Stream the full CV text with typewriter effect
-        const cvText = cvToText();
-        typewriter(
-          cvText,
+        // Stream the CV section by section (~2-3s total)
+        streamCvSections(
           (partial) =>
             setMessages((prev) => [
               ...prev.slice(0, -1),
               { role: 'assistant', content: partial },
             ]),
-          () => {
-            // After streaming, keep the full text
-            setMessages((prev) => [
-              ...prev.slice(0, -1),
-              { role: 'assistant', content: cvText },
-            ]);
-          },
+          () => {},
         );
       }, CV_DEBOUNCE_MS);
       return;
