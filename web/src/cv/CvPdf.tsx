@@ -1,17 +1,6 @@
 import React from 'react';
 import { cv } from './cv';
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
-
-// Register a standard font (Helvetica is built-in)
-Font.register({
-  family: 'Helvetica',
-  fonts: [
-    { src: 'Helvetica', fontWeight: 400 },
-    { src: 'Helvetica-Bold', fontWeight: 700 },
-    { src: 'Helvetica-Oblique', fontStyle: 'italic' },
-    { src: 'Helvetica-BoldOblique', fontWeight: 700, fontStyle: 'italic' },
-  ],
-});
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
 const styles = StyleSheet.create({
   page: {
