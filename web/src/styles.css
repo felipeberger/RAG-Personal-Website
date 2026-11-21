@@ -1,0 +1,339 @@
+/* ---------- Tokens ---------- */
+
+:root {
+  --measure: 56rem; /* one width for the chat bar, messages and CV: change it here */
+  --text-size: 1.25rem; /* 20px: questions, answers and the CV */
+  --header-h: 4rem; /* height of the sticky header */
+  --gutter: 1.25rem; /* page side padding */
+
+  --bg: #161618;
+  --surface: #212124;
+  --surface-2: #2b2b30;
+  --ink: #ececef;
+  --muted: #9a9aa3;
+  --rule: #34343a;
+  --accent: #8c9aff;
+  --accent-ink: #10112a;
+  --error: #ff8a8f;
+
+  --font: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  color-scheme: dark;
+}
+
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Small outlined pill buttons: suggestion chips and "New chat". */
+.suggestions button,
+.topbar button {
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.suggestions button:hover,
+.topbar button:hover {
+  color: var(--ink);
+  border-color: var(--muted);
+}
+
+/* ---------- Page ---------- */
+
+/* The single column. Everything inside it (log, messages, CV, composer) fills its width. */
+.page {
+  width: 100%;
+  max-width: var(--measure);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  display: flex;
+  flex-direction: column;
+}
+
+.page.landing {
+  justify-content: center;
+  padding-bottom: 8vh;
+}
+
+/* ---------- Landing ---------- */
+
+.hero {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.hero h1 {
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(3rem, 9vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.hero p {
+  margin: 0.75rem auto 0;
+  max-width: 38rem;
+  color: var(--muted);
+  font-size: var(--text-size);
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestions button {
+  padding: 0.45rem 0.9rem;
+}
+
+/* ---------- Conversation ---------- */
+
+/* Shown once a conversation has started: the name and "New chat". Stays put while scrolling. */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--header-h);
+  /* Extend the header's background into the page gutters. Without this, glyph edges and link
+     text that overhang the column by a pixel show through at the sides while scrolling. */
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+  background: var(--bg);
+  font-size: 1.5rem;
+}
+
+.topbar button {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.875rem;
+}
+
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem 0 2rem;
+}
+
+.msg {
+  overflow-wrap: anywhere;
+  scroll-margin-top: calc(var(--header-h) + 1rem); /* keep a message's top clear of the sticky header */
+  font-size: var(--text-size);
+}
+
+.msg.user {
+  align-self: flex-end; /* right edge lines up with the chat bar */
+  max-width: 85%;
+  padding: 0.6rem 1rem;
+  border-radius: 1.1rem;
+  background: var(--surface-2);
+  white-space: pre-wrap;
+}
+
+.msg.assistant {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.thinking {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.error {
+  margin: 0;
+  color: var(--error);
+}
+
+/* ---------- Composer ---------- */
+
+.composer {
+  position: relative;
+  padding: 0.9rem 3.5rem 0.9rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: 1.25rem;
+  background: var(--surface);
+}
+
+.composer:focus-within {
+  border-color: var(--muted);
+}
+
+.composer textarea {
+  display: block;
+  width: 100%;
+  resize: none;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-size);
+}
+
+.composer textarea::placeholder {
+  color: var(--muted);
+}
+
+.composer-actions {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.7rem;
+}
+
+.composer .icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+}
+
+.composer .icon:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Docked at the bottom once a conversation has started. */
+.page.started .composer {
+  position: sticky;
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  margin-top: auto;
+}
+
+/* ---------- CV ---------- */
+
+.cv {
+  margin-top: 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  line-height: 1.55;
+  white-space: normal;
+}
+
+.cv-head {
+  text-align: center;
+}
+
+.cv h2 {
+  margin: 0;
+  font-weight: 400;
+  font-size: 2.5rem;
+  line-height: 1.1;
+}
+
+.cv h3 {
+  margin: 2rem 0 0.75rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: 1em;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.cv p {
+  margin: 0.25rem 0;
+}
+
+.cv-contact {
+  color: var(--muted);
+}
+
+.cv-contact a {
+  margin-inline: 0.4rem; /* equal space either side, so the row stays centred */
+}
+
+.cv-item {
+  margin-bottom: 1.25rem;
+}
+
+.cv-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+.cv-row span {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.cv ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.cv li {
+  margin: 0.3rem 0;
+}
+
+.cv-skills {
+  margin: 0;
+}
+
+.cv-skills div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.cv-skills dt {
+  min-width: 12rem;
+  color: var(--muted);
+}
+
+.cv-skills dd {
+  flex: 1 1 14rem;
+  margin: 0;
+}

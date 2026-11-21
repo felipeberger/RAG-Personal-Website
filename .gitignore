@@ -11,3 +11,7 @@ data/index.json.tmp
 # Package installation files
 *.deb
 *.rpm
+
+# Node.js / frontend
+node_modules/
+dist/
