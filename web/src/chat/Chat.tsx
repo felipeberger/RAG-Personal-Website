@@ -8,8 +8,11 @@ const MAX_MESSAGES = 12; // matches the API's limit per request
 const FOLLOW_THRESHOLD = 120; // px from the bottom that still counts as "at the bottom"
 
 const SUGGESTIONS = [
+  'What is his experience with Ruby on Rails?',
+  'What is his experience with Rust?',
+  'What are his main software skills?',
+  'What is his consulting experience?',
   'Which roles is he looking for?',
-  'What has he built in Rust?',
   'Is he available to start now?',
 ];
 
