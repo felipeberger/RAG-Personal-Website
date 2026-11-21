@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import CvView from '../cv/CvView';
 import { ChatError, streamChat, type ChatTurn } from './streamChat';
 import { downloadCvPdf } from '../cv/CvPdf';
+import MessageContent from './MessageContent';
 
 const DEFAULT_PROMPT = "Show me Felipe's CV";
 const MAX_INPUT = 600; // matches the API's limit for visitor messages
@@ -203,8 +204,8 @@ export default function Chat() {
       {started && (
         <div className="log" role="log" aria-live="polite" aria-busy={busy}>
           {messages.map((m, i) => (
-            <div key={i} ref={m.cv ? cvRef : undefined} className={`msg ${m.role}`}>
-              {m.content || <span className="thinking">Thinking</span>}
+            <div key={i} className={`msg ${m.role}`}>
+              {m.content ? <MessageContent>{m.content}</MessageContent> : <span className="thinking">Thinking</span>}
               {m.cv && <CvView />}
             </div>
           ))}

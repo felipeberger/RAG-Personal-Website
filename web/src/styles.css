@@ -395,3 +395,18 @@ a {
     transition: none;
   }
 }
+
+/* Auto-linked emails/URLs in messages */
+.message-content {
+  display: inline;
+}
+
+.message-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.message-link:hover {
+  opacity: 0.8;
+}
