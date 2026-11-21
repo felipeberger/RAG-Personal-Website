@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import CvView from '../cv/CvView';
 import { ChatError, streamChat, type ChatTurn } from './streamChat';
 import { downloadCvPdf } from '../cv/CvPdf';
-import { cv } from '../cv/cv';
 
 const DEFAULT_PROMPT = "Show me Felipe's CV";
 const MAX_INPUT = 600; // matches the API's limit for visitor messages
@@ -19,97 +19,9 @@ const SUGGESTIONS = [
 ];
 
 const CV_DEBOUNCE_MS = 600; // brief pause before showing CV so it feels natural
-const CV_SECTION_DELAY_MS = 350; // ms between sections (6 sections * 350ms = ~2.1s total)
 
 interface UiMessage extends ChatTurn {
   cv?: boolean; // render the CV under this assistant message
-}
-
-/** Stream CV in major sections for a ~2-3s total effect */
-function streamCvSections(onDelta: (partial: string) => void, onComplete: () => void): void {
-  const fullText = cvToText();
-  // Split into major CV sections (7 sections = ~2-3s at 300ms each)
-  const majorSections = [
-    // Header + Summary
-    fullText.substring(0, fullText.indexOf('\n\nEXPERIENCE') + 10),
-    // Experience
-    fullText.substring(fullText.indexOf('EXPERIENCE'), fullText.indexOf('\n\nEDUCATION')),
-    // Education
-    fullText.substring(fullText.indexOf('EDUCATION'), fullText.indexOf('\n\nCERTIFICATION')),
-    // Certification
-    fullText.substring(fullText.indexOf('CERTIFICATION'), fullText.indexOf('\n\nSKILLS')),
-    // Skills
-    fullText.substring(fullText.indexOf('SKILLS'), fullText.indexOf('\n\nLANGUAGES')),
-    // Languages
-    fullText.substring(fullText.indexOf('LANGUAGES')),
-  ].filter(Boolean);
-
-  let current = '';
-  let sectionIndex = 0;
-
-  function nextSection() {
-    if (sectionIndex >= majorSections.length) {
-      onComplete();
-      return;
-    }
-    const section = majorSections[sectionIndex];
-    // Add section with a newline if not the first
-    current += (sectionIndex > 0 ? '\n\n' : '') + section;
-    onDelta(current);
-    sectionIndex++;
-    setTimeout(nextSection, CV_SECTION_DELAY_MS);
-  }
-  nextSection();
-}
-
-/** Convert CV data to formatted text for streaming */
-function cvToText(): string {
-  const lines: string[] = [];
-  lines.push(cv.name);
-  lines.push(cv.headline);
-  lines.push(cv.location);
-  lines.push(`${cv.links.github}  •  ${cv.links.linkedin}  •  ${cv.links.email}`);
-  lines.push('');
-  lines.push('SUMMARY');
-  lines.push(cv.summary);
-  lines.push('');
-
-  for (const group of cv.experience) {
-    lines.push(group.heading.toUpperCase());
-    for (const role of group.roles) {
-      lines.push(`${role.title}, ${role.org}`);
-      lines.push(role.period);
-      for (const bullet of role.bullets) {
-        lines.push(`  • ${bullet}`);
-      }
-      lines.push('');
-    }
-  }
-
-  lines.push('EDUCATION');
-  for (const edu of cv.education) {
-    lines.push(`${edu.title}, ${edu.org}`);
-    lines.push(edu.period);
-    lines.push('');
-  }
-
-  lines.push('CERTIFICATION');
-  for (const cert of cv.certifications) {
-    lines.push(`${cert.title}, ${cert.org}`);
-    lines.push(cert.period);
-    lines.push('');
-  }
-
-  lines.push('SKILLS');
-  for (const skill of cv.skills) {
-    lines.push(`${skill.label}: ${skill.items.join(', ')}`);
-  }
-  lines.push('');
-
-  lines.push('LANGUAGES');
-  lines.push(cv.languages);
-
-  return lines.join('\n');
 }
 
 /** Short "show me the CV" requests are answered locally with the rendered CV, no API call. */
@@ -135,7 +47,9 @@ export default function Chat() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const cvRef = useRef<HTMLDivElement>(null); // the latest CV message
   const followRef = useRef(true); // keep the newest text in view?
+  const showCvTopRef = useRef(false); // on the next render, scroll to the start of the CV
 
   const started = messages.length > 0;
 
@@ -150,7 +64,12 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
-    if (followRef.current && started) {
+    if (showCvTopRef.current && cvRef.current) {
+      // A CV is long: start reading at its top instead of jumping to its end.
+      showCvTopRef.current = false;
+      followRef.current = false;
+      cvRef.current.scrollIntoView({ block: 'start' });
+    } else if (followRef.current && started) {
       window.scrollTo({ top: document.documentElement.scrollHeight });
     }
   }, [messages, error, started]);
@@ -177,18 +96,14 @@ export default function Chat() {
     }
 
     if (isCvRequest(question)) {
-      // Show "thinking" first
+      showCvTopRef.current = true;
+      // Show "thinking" briefly, then show formatted CV
       setMessages((prev) => [...prev, asked, { role: 'assistant', content: '' }]);
       setTimeout(() => {
-        // Stream the CV section by section (~2-3s total)
-        streamCvSections(
-          (partial) =>
-            setMessages((prev) => [
-              ...prev.slice(0, -1),
-              { role: 'assistant', content: partial },
-            ]),
-          () => {},
-        );
+        setMessages((prev) => [
+          ...prev.slice(0, -1),
+          { role: 'assistant', content: "Here's Felipe's CV.", cv: true },
+        ]);
       }, CV_DEBOUNCE_MS);
       return;
     }
@@ -262,15 +177,16 @@ export default function Chat() {
       ) : (
         <header className="hero">
           <h1>Felipe Berger</h1>
-          <p>Product engineer in Canberra. Ask about his work, projects and skills.</p>
+          <p>Backend engineer in Canberra. Ask about his work, projects and skills.</p>
         </header>
       )}
 
       {started && (
         <div className="log" role="log" aria-live="polite" aria-busy={busy}>
           {messages.map((m, i) => (
-            <div key={i} className={`msg ${m.role}`}>
+            <div key={i} ref={m.cv ? cvRef : undefined} className={`msg ${m.role}`}>
               {m.content || <span className="thinking">Thinking</span>}
+              {m.cv && <CvView />}
             </div>
           ))}
           {error && (
