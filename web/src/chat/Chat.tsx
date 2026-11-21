@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import CvView from '../cv/CvView';
 import { ChatError, streamChat, type ChatTurn } from './streamChat';
+import { downloadCvPdf } from '../cv/CvPdf';
+import MessageContent from './MessageContent';
 
 const DEFAULT_PROMPT = "Show me Felipe's CV";
 const MAX_INPUT = 600; // matches the API's limit for visitor messages
@@ -14,7 +16,10 @@ const SUGGESTIONS = [
   'What is his consulting experience?',
   'Which roles is he looking for?',
   'Is he available to start now?',
+  'Download CV',
 ];
+
+const CV_DEBOUNCE_MS = 600; // brief pause before showing CV so it feels natural
 
 interface UiMessage extends ChatTurn {
   cv?: boolean; // render the CV under this assistant message
@@ -26,15 +31,25 @@ function isCvRequest(q: string): boolean {
   return words <= 8 && /(^|\W)(cv|resume|résumé)(\W|$)/i.test(q);
 }
 
+/** Detect "download/save/export/send/give/email/share CV" requests. */
+function isDownloadCvRequest(q: string): boolean {
+  const words = q.trim().split(/\s+/).length;
+  if (words > 8) return false;
+  // Download verbs + "give/send/email/share me" patterns
+  const hasDownloadVerb = /(^|\W)(download|save|export|get)(\W|$)/i.test(q);
+  const hasGivePattern = /(^|\W)(give|send|email|share)\s+(me|us)\b/i.test(q);
+  const hasCvKeyword = /(cv|resume|résumé)/i.test(q);
+  return hasCvKeyword && (hasDownloadVerb || hasGivePattern);
+}
+
 export default function Chat() {
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [input, setInput] = useState(DEFAULT_PROMPT);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const cvRef = useRef<HTMLDivElement>(null); // the latest CV message
   const followRef = useRef(true); // keep the newest text in view?
-  const showCvTopRef = useRef(false); // on the next render, scroll to the start of the CV
+  const cvDebounceRef = useRef(0 as number); // CV debounce timer
 
   const started = messages.length > 0;
 
@@ -48,30 +63,61 @@ export default function Chat() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Scroll to bottom for new messages (unless user scrolled up)
   useEffect(() => {
-    if (showCvTopRef.current && cvRef.current) {
-      // A CV is long: start reading at its top instead of jumping to its end.
-      showCvTopRef.current = false;
-      followRef.current = false;
-      cvRef.current.scrollIntoView({ block: 'start' });
-    } else if (followRef.current && started) {
+    if (followRef.current && started) {
       window.scrollTo({ top: document.documentElement.scrollHeight });
     }
-  }, [messages, error, started]);
+  }, [messages, started]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  // Cleanup CV debounce timer on unmount
+  useEffect(() => () => {
+    if (cvDebounceRef.current) {
+      clearTimeout(cvDebounceRef.current);
+    }
+  }, []);
 
   async function send(text: string) {
     const question = text.trim();
     if (!question || busy) return;
 
+    // Clear any pending CV debounce timer
+    if (cvDebounceRef.current) {
+      clearTimeout(cvDebounceRef.current);
+      cvDebounceRef.current = 0;
+    }
+
     setError(null);
     setInput('');
     const asked: UiMessage = { role: 'user', content: question };
 
+    if (isDownloadCvRequest(question)) {
+      setMessages((prev) => [...prev, asked, { role: 'assistant', content: 'Preparing your CV download...' }]);
+      try {
+        await downloadCvPdf();
+        setMessages((prev) => [...prev.slice(0, -1), { role: 'assistant', content: "CV downloaded! Check your downloads folder." }]);
+      } catch {
+        setMessages((prev) => [...prev.slice(0, -1), { role: 'assistant', content: "Sorry, couldn't generate the PDF. Try again?" }]);
+      }
+      return;
+    }
+
     if (isCvRequest(question)) {
-      showCvTopRef.current = true;
-      setMessages((prev) => [...prev, asked, { role: 'assistant', content: "Here's Felipe's CV.", cv: true }]);
+      // Show "thinking" briefly, then show formatted CV
+      setMessages((prev) => [...prev, asked, { role: 'assistant', content: '' }]);
+      cvDebounceRef.current = setTimeout(() => {
+        // Prevent auto-scroll to bottom when CV appears - keep view at top
+        followRef.current = false;
+        setMessages((prev) => [
+          ...prev.slice(0, -1),
+          { role: 'assistant', content: "Here's Felipe's CV.", cv: true },
+        ]);
+        cvDebounceRef.current = 0;
+        // Re-enable auto-scroll after a brief moment so subsequent messages scroll normally
+        setTimeout(() => { followRef.current = true; }, 100);
+      }, CV_DEBOUNCE_MS);
       return;
     }
 
@@ -112,6 +158,10 @@ export default function Chat() {
 
   function newChat() {
     abortRef.current?.abort();
+    if (cvDebounceRef.current) {
+      clearTimeout(cvDebounceRef.current);
+      cvDebounceRef.current = 0;
+    }
     setMessages([]);
     setError(null);
     setBusy(false);
@@ -144,15 +194,15 @@ export default function Chat() {
       ) : (
         <header className="hero">
           <h1>Felipe Berger</h1>
-          <p>Backend engineer in Canberra. Ask about his work, projects and skills.</p>
+          <p>Product engineer in Canberra. Ask about his work, projects and skills.</p>
         </header>
       )}
 
       {started && (
         <div className="log" role="log" aria-live="polite" aria-busy={busy}>
           {messages.map((m, i) => (
-            <div key={i} ref={m.cv ? cvRef : undefined} className={`msg ${m.role}`}>
-              {m.content || <span className="thinking">Thinking</span>}
+            <div key={i} className={`msg ${m.role}`}>
+              {m.content ? <MessageContent>{m.content}</MessageContent> : <span className="thinking">Thinking</span>}
               {m.cv && <CvView />}
             </div>
           ))}

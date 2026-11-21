@@ -337,3 +337,76 @@ a {
   flex: 1 1 14rem;
   margin: 0;
 }
+
+/* CV download button */
+.cv-download {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.cv-download:hover {
+  opacity: 0.9;
+}
+
+.cv-download:active {
+  transform: scale(0.98);
+}
+
+.cv-download:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.cv-download:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--muted);
+  border-color: var(--muted);
+  color: var(--ink);
+}
+
+/* CV section reveal animation */
+.cv-section {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  will-change: opacity, transform;
+}
+
+.cv-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduced motion: instant reveal */
+@media (prefers-reduced-motion: reduce) {
+  .cv-section {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Auto-linked emails/URLs in messages */
+.message-content {
+  display: inline;
+}
+
+.message-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.message-link:hover {
+  opacity: 0.8;
+}
