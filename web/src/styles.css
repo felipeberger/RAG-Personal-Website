@@ -373,3 +373,25 @@ a {
   border-color: var(--muted);
   color: var(--ink);
 }
+
+/* CV section reveal animation */
+.cv-section {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  will-change: opacity, transform;
+}
+
+.cv-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduced motion: instant reveal */
+@media (prefers-reduced-motion: reduce) {
+  .cv-section {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
