@@ -1,3 +1,4 @@
+import React from 'react';
 import { cv } from './cv';
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 
@@ -154,14 +155,92 @@ const styles = StyleSheet.create({
     color: '#333',
     marginTop: 8,
   },
+  // Pagination control styles
+  keepTogether: {
+    // This view will not break across pages
+  },
+  roleBlock: {
+    // Conservative minimum height to keep role header + first bullet together
+    minHeight: 60,
+  },
 });
+
+/** Role block that keeps header + bullets together on one page */
+interface RoleBlockProps {
+  role: { title: string; org: string; period: string; bullets: string[] };
+}
+function RoleBlock({ role }: RoleBlockProps) {
+  return (
+    <View style={styles.role} wrap={false}>
+      <View style={styles.roleHeader}>
+        <Text style={styles.roleTitleOrg}>
+          {role.title}, {role.org}
+        </Text>
+        <Text style={styles.rolePeriod}>{role.period}</Text>
+      </View>
+      <View style={styles.bullets}>
+        {role.bullets.map((bullet, i) => (
+          <Text key={i} style={styles.bullet}>
+            {'\u2022 '}{bullet}
+          </Text>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/** Role group with section title and roles */
+interface RoleGroupProps {
+  group: typeof cv.experience[0];
+}
+function RoleGroup({ group }: RoleGroupProps) {
+  return (
+    <View style={styles.roleGroup} wrap={true}>
+      <Text style={styles.roleGroupTitle}>{group.heading}</Text>
+      {group.roles.map((role) => (
+        <RoleBlock key={`${role.org}-${role.period}`} role={role} />
+      ))}
+    </View>
+  );
+}
+
+/** Section wrapper that can force a page break before it */
+interface SectionProps {
+  title: string;
+  children: React.ReactNode;
+  breakBefore?: boolean;
+}
+function Section({ title, children, breakBefore = false }: SectionProps) {
+  return (
+    <View style={styles.section} wrap={true} break={breakBefore}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+/** Education section with forced page break before it */
+function EducationSection() {
+  return (
+    <Section title="Education" breakBefore={true}>
+      {cv.education.map((edu) => (
+        <View key={edu.title} style={styles.educationItem} wrap={false}>
+          <Text style={styles.eduTitleOrg}>
+            {edu.title}, {edu.org}
+          </Text>
+          <Text style={styles.eduPeriod}>{edu.period}</Text>
+        </View>
+      ))}
+    </Section>
+  );
+}
 
 export function CvPdfDocument() {
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        {/* Header */}
-        <View style={styles.header}>
+      <Page size="A4" style={styles.page} wrap={true}>
+        {/* Header - keep together on first page */}
+        <View style={styles.header} wrap={false}>
           <Text style={styles.name}>{cv.name}</Text>
           <Text style={styles.headline}>{cv.headline}</Text>
           <Text style={styles.contact}>
@@ -177,82 +256,48 @@ export function CvPdfDocument() {
         </View>
 
         {/* Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Summary</Text>
+        <Section title="Summary">
           <Text style={styles.summary}>{cv.summary}</Text>
-        </View>
+        </Section>
 
-        {/* Experience */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Experience</Text>
+        {/* Experience - each role group wraps, roles kept together */}
+        <Section title="Experience">
           {cv.experience.map((group) => (
-            <View key={group.heading} style={styles.roleGroup}>
-              <Text style={styles.roleGroupTitle}>{group.heading}</Text>
-              {group.roles.map((role) => (
-                <View key={`${role.org}-${role.period}`} style={styles.role}>
-                  <View style={styles.roleHeader}>
-                    <Text style={styles.roleTitleOrg}>
-                      {role.title}, {role.org}
-                    </Text>
-                    <Text style={styles.rolePeriod}>{role.period}</Text>
-                  </View>
-                  <View style={styles.bullets}>
-                    {role.bullets.map((bullet, i) => (
-                      <Text key={i} style={styles.bullet}>
-                        {'\u2022 '}{bullet}
-                      </Text>
-                    ))}
-                  </View>
-                </View>
-              ))}
-            </View>
+            <RoleGroup key={group.heading} group={group} />
           ))}
-        </View>
+        </Section>
 
-        {/* Education */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Education</Text>
-          {cv.education.map((edu) => (
-            <View key={edu.title} style={styles.educationItem}>
-              <Text style={styles.eduTitleOrg}>
-                {edu.title}, {edu.org}
-              </Text>
-              <Text style={styles.eduPeriod}>{edu.period}</Text>
-            </View>
-          ))}
-        </View>
+        {/* Education - force page break before it */}
+        <EducationSection />
 
         {/* Certifications */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Certification</Text>
+        <Section title="Certification">
           {cv.certifications.map((cert) => (
-            <View key={cert.title} style={styles.certItem}>
+            <View key={cert.title} style={styles.certItem} wrap={false}>
               <Text style={styles.certTitleOrg}>
                 {cert.title}, {cert.org}
               </Text>
               <Text style={styles.certPeriod}>{cert.period}</Text>
             </View>
           ))}
-        </View>
+        </Section>
 
         {/* Skills */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Skills</Text>
-          <View style={styles.skillsList}>
+        <Section title="Skills">
+          <View style={styles.skillsList} wrap={true}>
             {cv.skills.map((skill) => (
-              <View key={skill.label} style={styles.skillCategory}>
+              <View key={skill.label} style={styles.skillCategory} wrap={false}>
                 <Text style={styles.skillLabel}>{skill.label}</Text>
                 <Text style={styles.skillItems}>{skill.items.join(', ')}</Text>
               </View>
             ))}
           </View>
-        </View>
+        </Section>
 
         {/* Languages */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Languages</Text>
+        <Section title="Languages">
           <Text style={styles.languages}>{cv.languages}</Text>
-        </View>
+        </Section>
       </Page>
     </Document>
   );
