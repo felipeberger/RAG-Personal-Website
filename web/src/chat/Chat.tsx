@@ -18,6 +18,8 @@ const SUGGESTIONS = [
   'Download CV',
 ];
 
+const CV_DEBOUNCE_MS = 600; // brief pause before showing CV so it feels natural
+
 interface UiMessage extends ChatTurn {
   cv?: boolean; // render the CV under this assistant message
 }
@@ -95,7 +97,14 @@ export default function Chat() {
 
     if (isCvRequest(question)) {
       showCvTopRef.current = true;
-      setMessages((prev) => [...prev, asked, { role: 'assistant', content: "Here's Felipe's CV.", cv: true }]);
+      // Show "thinking" first, then reveal CV after a brief debounce
+      setMessages((prev) => [...prev, asked, { role: 'assistant', content: '' }]);
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev.slice(0, -1),
+          { role: 'assistant', content: "Here's Felipe's CV.", cv: true },
+        ]);
+      }, CV_DEBOUNCE_MS);
       return;
     }
 
