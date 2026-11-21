@@ -321,7 +321,9 @@ export async function downloadCvPdf(): Promise<void> {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Defer revocation to allow browser to start the download.
+    // Immediate revocation can cause silent failures in Firefox/Safari.
+    queueMicrotask(() => URL.revokeObjectURL(url));
   } catch (error) {
     console.error('Failed to generate CV PDF:', error);
     throw new Error('Could not generate PDF. Please try again.');
