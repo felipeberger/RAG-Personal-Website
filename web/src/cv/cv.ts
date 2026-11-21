@@ -88,8 +88,8 @@ export const cv = {
           ],
         },
         {
-          title: 'Consultant, then Senior Consultant',
-          org: 'Emerging Markets Consulting, Cambodia and Laos',
+          title: 'Consultant / Senior Consultant',
+          org: 'Emerging Markets Consulting, SE Asia',
           period: 'April 2013 – June 2021',
           bullets: [
             'Led over 35 projects and a team of four across Southeast Asia for government, business and NGO clients, including market entry studies, market sizing, regulatory assessments, feasibility studies and monitoring and evaluation.',
