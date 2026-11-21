@@ -50,6 +50,7 @@ export default function Chat() {
   const cvRef = useRef<HTMLDivElement>(null); // the latest CV message
   const followRef = useRef(true); // keep the newest text in view?
   const showCvTopRef = useRef(false); // on the next render, scroll to the start of the CV
+  const cvDebounceRef = useRef(0 as number); // CV debounce timer
 
   const started = messages.length > 0;
 
@@ -76,9 +77,22 @@ export default function Chat() {
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
+  // Cleanup CV debounce timer on unmount
+  useEffect(() => () => {
+    if (cvDebounceRef.current) {
+      clearTimeout(cvDebounceRef.current);
+    }
+  }, []);
+
   async function send(text: string) {
     const question = text.trim();
     if (!question || busy) return;
+
+    // Clear any pending CV debounce timer
+    if (cvDebounceRef.current) {
+      clearTimeout(cvDebounceRef.current);
+      cvDebounceRef.current = 0;
+    }
 
     setError(null);
     setInput('');
@@ -99,11 +113,12 @@ export default function Chat() {
       showCvTopRef.current = true;
       // Show "thinking" briefly, then show formatted CV
       setMessages((prev) => [...prev, asked, { role: 'assistant', content: '' }]);
-      setTimeout(() => {
+      cvDebounceRef.current = setTimeout(() => {
         setMessages((prev) => [
           ...prev.slice(0, -1),
           { role: 'assistant', content: "Here's Felipe's CV.", cv: true },
         ]);
+        cvDebounceRef.current = 0;
       }, CV_DEBOUNCE_MS);
       return;
     }
@@ -145,6 +160,10 @@ export default function Chat() {
 
   function newChat() {
     abortRef.current?.abort();
+    if (cvDebounceRef.current) {
+      clearTimeout(cvDebounceRef.current);
+      cvDebounceRef.current = 0;
+    }
     setMessages([]);
     setError(null);
     setBusy(false);
