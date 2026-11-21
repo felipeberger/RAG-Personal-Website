@@ -48,9 +48,7 @@ export default function Chat() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const cvRef = useRef<HTMLDivElement>(null); // the latest CV message
   const followRef = useRef(true); // keep the newest text in view?
-  const showCvTopRef = useRef(false); // on the next render, scroll to the start of the CV
   const cvDebounceRef = useRef(0 as number); // CV debounce timer
 
   const started = messages.length > 0;
@@ -65,16 +63,12 @@ export default function Chat() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Scroll to bottom for new messages (unless user scrolled up)
   useEffect(() => {
-    if (showCvTopRef.current && cvRef.current) {
-      // A CV is long: start reading at its top instead of jumping to its end.
-      showCvTopRef.current = false;
-      followRef.current = false;
-      cvRef.current.scrollIntoView({ block: 'start' });
-    } else if (followRef.current && started) {
+    if (followRef.current && started) {
       window.scrollTo({ top: document.documentElement.scrollHeight });
     }
-  }, [messages, error, started]);
+  }, [messages, started]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -111,15 +105,18 @@ export default function Chat() {
     }
 
     if (isCvRequest(question)) {
-      showCvTopRef.current = true;
       // Show "thinking" briefly, then show formatted CV
       setMessages((prev) => [...prev, asked, { role: 'assistant', content: '' }]);
       cvDebounceRef.current = setTimeout(() => {
+        // Prevent auto-scroll to bottom when CV appears - keep view at top
+        followRef.current = false;
         setMessages((prev) => [
           ...prev.slice(0, -1),
           { role: 'assistant', content: "Here's Felipe's CV.", cv: true },
         ]);
         cvDebounceRef.current = 0;
+        // Re-enable auto-scroll after a brief moment so subsequent messages scroll normally
+        setTimeout(() => { followRef.current = true; }, 100);
       }, CV_DEBOUNCE_MS);
       return;
     }
